@@ -26,6 +26,25 @@ def get_rounds_input():
         print(f"Actual number of rounds to be played: {adjusted_rounds}")
     return adjusted_rounds
 
+def get_evolutionary_tournament_preset():
+    print("Do you want to use a preset for the Evolutionary Tournament?: ")
+    print("Select the preset you want to use:")
+    print("0. Pick my own values")
+    print("1. Larger Simulation")
+    print("2. Smaller Simulation")
+    preset_choice = int(input("Enter your choice: "))
+    if preset_choice == 1:
+        # Example of a larger simulation preset
+        return 100, 1000, 50, 200, 0.2, 0.01
+    elif preset_choice == 2:
+        # Example of a smaller simulation preset
+        return 10, 100, 10, 20, 0.1, 0.01
+    elif preset_choice == 0:
+        return get_evolutionary_tournament_input()
+    else:
+        return get_evolutionary_tournament_input()
+
+
 def get_evolutionary_tournament_input():
     generations = int(input("Enter the number of generations for the Evolutionary Tournament: "))
     total_population = int(input("Enter the total population size for the Evolutionary Tournament: "))
@@ -47,9 +66,10 @@ def main():
         for strategy, score in sorted(results.items(), key=lambda item: item[1], reverse=True):
             print(f"{strategy}: {score}")
     elif tournament_type == 2:
-        generations, total_population, group_size, rounds, elimination_rate, mutation_chance = get_evolutionary_tournament_input()
-        print(f"Running Evolutionary Tournament with {total_population} individuals, group size of {group_size}, for {generations} generations, with mutation set to {mutation_chance}...")
-        evolutionary_tournament(total_population, group_size, rounds, generations, elimination_rate, mutation_chance)
+        evolutionary_inputs = get_evolutionary_tournament_preset()
+        print(f"Running Evolutionary Tournament with {evolutionary_inputs[1]} individuals, group size of {evolutionary_inputs[2]}, for {evolutionary_inputs[0]} generations, with mutation set to {evolutionary_inputs[5]}...")
+        evolutionary_tournament(*evolutionary_inputs)
+
     else:
         print("Invalid selection.")
 

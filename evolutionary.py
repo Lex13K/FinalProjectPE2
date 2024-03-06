@@ -1,6 +1,7 @@
 from roundRobin import round_robin_tournament
 from strategies import *
 import random
+import matplotlib.pyplot as plt
 
 strategy_functions = [tit_for_tat, suspicious_tit_for_tat, tit_for_two_tats, always_defect, pavlov, tester, joss,
                       grudger, soft_majority, hard_majority, prober, random_strategy]
@@ -83,16 +84,31 @@ def introduce_mutation(population, mutation_chance):
     return population
 
 
-def evolutionary_tournament(total_population, group_size, rounds, generations, elimination_rate, mutation_chance):
+def evolutionary_tournament(generations, total_population, group_size, rounds, elimination_rate, mutation_chance):
     """Execute the evolutionary tournament across multiple generations."""
     population = create_initial_population(strategy_functions, total_population)
+
+    breaker = False
 
     for generation in range(generations):
         print(f"\nGeneration {generation + 1}:")
         population = conduct_group_tournaments(population, group_size, rounds, elimination_rate)
+
+        # Check if any strategy exceeds the 99% threshold
+        strategy_counts = {strategy.__name__: population.count(strategy) for strategy in strategy_functions}
+        for strategy, count in strategy_counts.items():
+            if count / total_population > 0.99:
+                print(f"Strategy {strategy} has exceeded 99% of the population. Stopping early at generation {generation + 1}.")
+                # Break out of the loop to end the tournament
+                breaker = True
+                break
+
+        if breaker:
+            break
+
+        # Introduce mutation if no strategy has exceeded the threshold
         population = introduce_mutation(population, mutation_chance)
 
-    # Final population distribution
     # Final population distribution
     final_distribution = {strategy.__name__: population.count(strategy) for strategy in strategy_functions}
 
@@ -104,4 +120,37 @@ def evolutionary_tournament(total_population, group_size, rounds, generations, e
         print(f"Strategy '{strategy}': {count} individuals")
 
 
+    filtered_distribution = {strategy: count for strategy, count in final_distribution.items() if count > 0}
+
+    # Determine a threshold for grouping into "Others"
+    total_count = sum(filtered_distribution.values())
+    threshold = total_count * 0.01  # For example, strategies representing less than 1% of the total
+
+    # Split strategies into main and others
+    main_strategies = {k: v for k, v in filtered_distribution.items() if v > threshold}
+    others_count = sum(v for k, v in filtered_distribution.items() if v <= threshold)
+    if others_count > 0:
+        main_strategies['Others'] = others_count
+
+    # Sort the strategies by count in descending order
+    sorted_strategies = dict(sorted(main_strategies.items(), key=lambda item: item[1], reverse=True))
+
+    # Data for plotting
+    labels = sorted_strategies.keys()
+    sizes = sorted_strategies.values()
+    colors = plt.get_cmap('tab20').colors  # Get a set of colors up to the number of strategies
+
+    # Plotting pie chart
+    plt.figure(figsize=(10, 8))  # Adjusts the size of the figure
+    # Startangle is set to 90 to start from the top. Setting counterclock=False will make it clockwise.
+    patches, texts, autotexts = plt.pie(sizes, labels=labels, colors=colors[:len(labels)], autopct='%1.1f%%',
+                                        startangle=90, counterclock=False)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+    plt.title('Final Strategy Distribution')
+
+    # Increase the size of the percentage labels
+    for autotext in autotexts:
+        autotext.set_size('x-large')
+
+    plt.show()
 
