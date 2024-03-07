@@ -52,12 +52,12 @@ def getRoundsInput():
 
 
 def getEvolutionaryTournamentPreset():
+    print("Do you want to use a preset for the Evolutionary Tournament?: ")
+    print("0. Pick my own values")
+    print("1. Larger Simulation")
+    print("2. Smaller Simulation")
     while True:
         try:
-            print("Do you want to use a preset for the Evolutionary Tournament?: ")
-            print("0. Pick my own values")
-            print("1. Larger Simulation")
-            print("2. Smaller Simulation")
             presetChoice = int(input("Enter your choice: "))
             if presetChoice in [0, 1, 2]:
                 if presetChoice == 0:
