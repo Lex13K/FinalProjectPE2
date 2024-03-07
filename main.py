@@ -142,5 +142,4 @@ def main():
     else:
         print("Invalid selection.")  # Handle invalid tournament type selection
 
-if __name__ == "__main__":
-    main()  # Entry point of the program
+main()  # MOST IMPORTANT LINE OF THE CODE :D
